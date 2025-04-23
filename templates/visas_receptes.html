@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Visas receptes - Ances mīļākie deserti{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1 style="color: var(--dark);">Visas desertu receptes</h1>
+
+        <div class="filtri">
+            <form method="get" action="/visas-receptes">
+                <select name="kategorija">
+                    <option value="">Visas kategorijas</option>
+                    {% for kat in kategorijas %}
+                        <option value="{{ kat.id }}">{{ kat.nosaukums }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="sarezgitiba">
+                    <option value="">Jebkura grūtība</option>
+                    {% for s in sarezgitibas %}
+                        <option value="{{ s.id }}">{{ s.limenis }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="laiks">
+                    <option value="">Jebkurš laiks</option>
+                    {% for l in laiki %}
+                        <option value="{{ l.id }}">{{ l.minutes }} min</option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit">Filtrēt</button>
+            </form>
+        </div>
+
+        <div class="receptu-grid">
+            {% for recepte in receptes %}
+            <article class="recepte-karte">
+                <a href="/recepte/{{ recepte.id }}">
+                    <img src="/static/images/products/{{ recepte.image }}" alt="{{ recepte.nosaukums }}">
+                    <h3>{{ recepte.nosaukums }}</h3>
+                    <p class="kategorija">{{ recepte.kategorija }}</p>
+                    <p class="laiks">{{ recepte.laiks }} min</p>
+                </a>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

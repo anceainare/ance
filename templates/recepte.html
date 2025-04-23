@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Par mums - Ances mīļākie deserti{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="recepte-container">
+            <a href="/visas-receptes" class="back-button">← Atpakaļ pie receptēm</a>
+            
+            <div class="recepte-header">
+                <h1>{{ recepte.nosaukums }}</h1>
+                {% if recepte.apraksts %}
+                <p class="apraksts">{{ recepte.apraksts }}</p>
+                {% endif %}
+                <div class="meta-info">
+                    <span>Kategorija: {{ recepte.kategorija }}</span>
+                    <span>Grūtība: {{ recepte.sarezgitiba }}</span>
+                    <span>Laiks: {{ recepte.laiks }} minūtes</span>
+                </div>
+                {% if recepte.image %}
+                <img src="/static/images/products/{{ recepte.image }}" alt="{{ recepte.nosaukums }}" style="max-width: 100%; margin-top: 20px; border-radius: 8px;">
+                {% endif %}
+            </div>
+            
+            <div class="recepte-content">
+                <div class="ingredients">
+                    <h2>Sastāvdaļas</h2>
+                    <p>{{ recepte.sastavdalas|replace('\n', '<br>')|safe }}</p>
+                </div>
+                
+                <div class="instructions">
+                    <h2>Pagatavošanas instrukcijas</h2>
+                    <ol>
+                        {% if recepte.instrukcijas %}
+                            {% for step in recepte.instrukcijas.split('\n') %}
+                                {% if step.strip() %}
+                                    <li>{{ step }}</li>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <li>Pagatavošanas instrukcijas nav pieejamas</li>
+                        {% endif %}
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

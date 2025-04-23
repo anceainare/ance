@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Ances mīļākie deserti - Sākums{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <section class="hero">
+            <h1>Ances mīļākie deserti</h1>
+            <p>Vietne, kur atradīsiet visas Ances iecienītākās desertu receptes. Katra recepte ir rūpīgi izvēlēta un izmēģināta!</p>
+        </section>
+
+        <h2 style="color: var(--dark); text-align: center;">Visas receptes</h2>
+        
+        <div class="receptu-grid">
+            {% for recepte in receptes %}
+                <article class="recepte-karte">
+                    <a href="/recepte/{{ recepte.id }}">
+                        <img src="/static/images/products/{{ recepte.image }}" alt="{{ recepte.nosaukums }}">
+                        <h3>{{ recepte.nosaukums }}</h3>
+                        <p class="kategorija">{{ recepte.kategorija }}</p>
+                    </a>
+                </article>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
