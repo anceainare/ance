@@ -1,16 +1,8 @@
-from flask import Flask, render_template, request, abort
+from flask import Flask, render_template, request, abort, redirect, url_for
 from pathlib import Path
-import sqlite3
+import sqlite3 
 
 app = Flask(__name__)
-
-# Si lieta nestrada, es salaboju
-# app.config['DATABASE'] = 'receptes.db'
-
-# def get_db_connection():
-#     conn = sqlite3.connect(app.config['DATABASE'])
-#     conn.row_factory = sqlite3.Row
-#     return conn
 
 DATABASE = Path(__file__).parent / 'receptes.db'
 
@@ -81,9 +73,23 @@ def visas_receptes():
                          sarezgitibas=sarezgitibas,
                          laiki=laiki)
 
-@app.route('/recepte/<int:id>')
+@app.route('/recepte/<int:id>', methods=['GET', 'POST'])
 def recepte(id):
     conn = get_db_connection()
+    
+    if request.method == 'POST':
+        author_name = request.form.get('author_name', '').strip()
+        comment_text = request.form.get('comment_text', '').strip()
+        
+        if author_name and comment_text:
+            conn.execute(
+                'INSERT INTO comments (recepte_id, author_name, comment_text) VALUES (?, ?, ?)',
+                (id, author_name, comment_text)
+            )
+            conn.commit()
+            return redirect(url_for('recepte', id=id))
+    
+    # Get the recipe
     recepte = conn.execute('''
         SELECT r.id, r.nosaukums, r.image, r.apraksts, 
                r.sastavdalas, r.instrukcijas,
@@ -97,16 +103,64 @@ def recepte(id):
         WHERE r.id = ?
     ''', (id,)).fetchone()
     
+    # Get comments for this recipe
+    comments = conn.execute(
+        'SELECT * FROM comments WHERE recepte_id = ? ORDER BY created_at DESC',
+        (id,)
+    ).fetchall()
+    
     conn.close()
     
     if not recepte:
         abort(404)
         
-    return render_template('recepte.html', recepte=recepte)
+    return render_template('recepte.html', recepte=recepte, comments=comments)
+
+@app.route('/delete-comment/<int:id>', methods=['POST'])
+def delete_comment(id):
+    conn = get_db_connection()
+    
+    # In a real app, you'd want some authentication here
+    # For simplicity, we're allowing anyone to delete any comment
+    comment = conn.execute('SELECT * FROM comments WHERE id = ?', (id,)).fetchone()
+    if comment:
+        conn.execute('DELETE FROM comments WHERE id = ?', (id,))
+        conn.commit()
+    
+    conn.close()
+    return redirect(url_for('recepte', id=comment['recepte_id'])) if comment else abort(404)
 
 @app.route('/par-mums')
 def par_mums():
     return render_template('par_mums.html')
 
+def init_db():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    
+    # Check if comments table exists
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='comments'")
+    table_exists = cursor.fetchone()
+    
+    if not table_exists:
+        cursor.execute('''
+            CREATE TABLE comments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                recepte_id INTEGER NOT NULL,
+                author_name TEXT NOT NULL,
+                comment_text TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (recepte_id) REFERENCES receptes(id) ON DELETE CASCADE
+            )
+        ''')
+        conn.commit()
+        print("Created comments table")
+    else:
+        print("Comments table already exists")
+    
+    conn.close()
+
+# Call this function when your app starts
+init_db()
 if __name__ == '__main__':
     app.run(debug=True)
