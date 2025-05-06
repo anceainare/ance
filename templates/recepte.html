@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Par mums - Ances mīļākie deserti{% endblock %}
+{% block title %}{{ recepte.nosaukums }} - Ances mīļākie deserti{% endblock %}
 
 {% block content %}
     <div class="container">
@@ -10,7 +10,7 @@
             <div class="recepte-header">
                 <h1>{{ recepte.nosaukums }}</h1>
                 {% if recepte.apraksts %}
-                <p class="apraksts">{{ recepte.apraksts }}</p>
+                <p class="apraksts">{{ recepte.apraksts }}</p> 
                 {% endif %}
                 <div class="meta-info">
                     <span>Kategorija: {{ recepte.kategorija }}</span>
@@ -41,6 +41,39 @@
                             <li>Pagatavošanas instrukcijas nav pieejamas</li>
                         {% endif %}
                     </ol>
+                </div>
+                
+                <div class="comments-section">
+                    <h2>Komentāri</h2>
+                    
+                    <form method="POST" class="comment-form">
+                        <div class="form-group">
+                            <label for="author_name">Jūsu vārds:</label>
+                            <input type="text" id="author_name" name="author_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="comment_text">Jūsu komentārs:</label>
+                            <textarea id="comment_text" name="comment_text" required></textarea>
+                        </div>
+                        <button type="submit">Publicēt komentāru</button>
+                    </form>
+                    
+                    <div class="comments-list">
+                        {% for comment in comments %}
+                        <div class="comment">
+                            <div class="comment-header">
+                                <strong>{{ comment.author_name }}</strong>
+                                <span class="comment-date">{{ comment.created_at }}</span>
+                                <form method="POST" action="/delete-comment/{{ comment.id }}" class="delete-form">
+                                    <button type="submit" class="delete-button">Dzēst</button>
+                                </form>
+                            </div>
+                            <p>{{ comment.comment_text }}</p>
+                        </div>
+                        {% else %}
+                        <p>Vēl nav komentāru. Esi pirmais!</p>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
