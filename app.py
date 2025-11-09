@@ -89,7 +89,6 @@ def recepte(id):
             conn.commit()
             return redirect(url_for('recepte', id=id))
     
-    # Get the recipe
     recepte = conn.execute('''
         SELECT r.id, r.nosaukums, r.image, r.apraksts, 
                r.sastavdalas, r.instrukcijas,
@@ -103,7 +102,6 @@ def recepte(id):
         WHERE r.id = ?
     ''', (id,)).fetchone()
     
-    # Get comments for this recipe
     comments = conn.execute(
         'SELECT * FROM comments WHERE recepte_id = ? ORDER BY created_at DESC',
         (id,)
@@ -138,7 +136,6 @@ def init_db():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
     
-    # Check if comments table exists
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='comments'")
     table_exists = cursor.fetchone()
     
@@ -160,7 +157,6 @@ def init_db():
     
     conn.close()
 
-# Call this function when your app starts
 init_db()
 if __name__ == '__main__':
     app.run(debug=True)
