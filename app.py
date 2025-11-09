@@ -118,8 +118,6 @@ def recepte(id):
 def delete_comment(id):
     conn = get_db_connection()
     
-    # In a real app, you'd want some authentication here
-    # For simplicity, we're allowing anyone to delete any comment
     comment = conn.execute('SELECT * FROM comments WHERE id = ?', (id,)).fetchone()
     if comment:
         conn.execute('DELETE FROM comments WHERE id = ?', (id,))
